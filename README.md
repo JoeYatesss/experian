@@ -174,28 +174,48 @@ A production-ready fraud detection system with inference and training pipelines.
 - Environment variable configuration
 - Secure model loading and validation
 
-New Customer Behavior:
-Very new accounts (1-2 accounts) with low utilization are considered low risk (0.6-0.1%)
-The model is more lenient on new customers with limited history
-Credit Utilization Impact:
-Low utilization (10%): 0.1% fraud probability
-High utilization (95%): 1.3% fraud probability
-High balance contributes positively to risk, but not dramatically
-Impact of Arrears (Most Significant Factor):
-No arrears: Generally < 1% fraud probability
-1 account in arrears: 22.5% fraud probability
-3 accounts in arrears: 70.9% fraud probability (HIGH risk)
-This is the strongest individual risk factor
-Number of Accounts:
-Many accounts (15) with good standing: 6.6% risk
-Many accounts with arrears: Actually lower at 1.1% risk
-The model seems to consider many accounts as a sign of established credit history
-Edge Cases:
-Very high values (25 accounts, $100k limit): 16.5% risk
-Very small account ($1k limit): 0.8% risk
-The model is quite reasonable with extreme values
-Key Findings:
-Accounts in arrears is the strongest risk signal
-High balances increase risk but can be offset by good payment history
-Having many accounts isn't necessarily bad
-The model is most sensitive to payment behavior rather than account size
+## Model Behavior Analysis
+
+### Account Age and History
+- **New Accounts (1-2 accounts)**
+  - Low risk profile (0.1-0.6% fraud probability)
+  - Model is intentionally lenient on limited history
+  - Low utilization further reduces risk
+
+### Credit Utilization Impact
+- **Low Utilization (10%)**
+  - Very low risk (0.1% fraud probability)
+  - Indicates responsible credit management
+- **High Utilization (95%)**
+  - Moderate risk increase (1.3% fraud probability)
+  - Not a major risk factor in isolation
+
+### Payment History (Primary Risk Factor)
+- **Accounts in Arrears**
+  - No arrears: < 1% fraud probability
+  - 1 account in arrears: 22.5% fraud probability
+  - 3 accounts in arrears: 70.9% fraud probability (HIGH risk)
+  - Most significant individual risk factor
+
+### Account Portfolio Analysis
+- **Multiple Accounts in Good Standing**
+  - 15+ accounts: 6.6% base risk
+  - Indicates established credit history
+- **Multiple Accounts with Mixed History**
+  - Many accounts with some arrears: 1.1% risk
+  - Model values long-term history over isolated incidents
+
+### Edge Case Handling
+- **High-Value Accounts**
+  - Very high limits ($100k+): 16.5% risk
+  - Model applies additional scrutiny to large exposures
+- **Small Accounts**
+  - Low limits ($1k): 0.8% risk
+  - Model maintains proportional risk assessment
+
+### Key Model Characteristics
+1. Payment history (arrears) is the strongest predictor
+2. Account age and history provide important context
+3. Credit utilization has moderate impact
+4. Model balances multiple risk factors effectively
+5. Edge cases are handled with reasonable risk scaling
