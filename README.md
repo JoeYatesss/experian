@@ -173,16 +173,28 @@ A production-ready fraud detection system with inference and training pipelines.
 - Environment variable configuration
 - Secure model loading and validation
 
-
-Model Structure:
-It has 100 decision trees (quite a substantial model)
-Each tree makes decisions based on the 4 input features
-Feature Importance (from most to least important):
-total_balance: 1263.0 (most important feature)
-total_credit_limit: 719.0
-number_of_open_accounts: 479.0
-number_of_accounts_in_arrears: 174.0 (least important feature)
-Decision Making Process (looking at the first tree):
-First checks if number_of_accounts_in_arrears < 1
-Then looks at total_balance < 13451.87
-Then considers total_credit_limit < 1500
+New Customer Behavior:
+Very new accounts (1-2 accounts) with low utilization are considered low risk (0.6-0.1%)
+The model is more lenient on new customers with limited history
+Credit Utilization Impact:
+Low utilization (10%): 0.1% fraud probability
+High utilization (95%): 1.3% fraud probability
+High balance contributes positively to risk, but not dramatically
+Impact of Arrears (Most Significant Factor):
+No arrears: Generally < 1% fraud probability
+1 account in arrears: 22.5% fraud probability
+3 accounts in arrears: 70.9% fraud probability (HIGH risk)
+This is the strongest individual risk factor
+Number of Accounts:
+Many accounts (15) with good standing: 6.6% risk
+Many accounts with arrears: Actually lower at 1.1% risk
+The model seems to consider many accounts as a sign of established credit history
+Edge Cases:
+Very high values (25 accounts, $100k limit): 16.5% risk
+Very small account ($1k limit): 0.8% risk
+The model is quite reasonable with extreme values
+Key Findings:
+Accounts in arrears is the strongest risk signal
+High balances increase risk but can be offset by good payment history
+Having many accounts isn't necessarily bad
+The model is most sensitive to payment behavior rather than account size
