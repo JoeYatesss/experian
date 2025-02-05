@@ -10,7 +10,6 @@ import logging
 from contextlib import asynccontextmanager
 import time
 from datetime import datetime
-from .model_registry import ModelRegistry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,9 +18,6 @@ logger = logging.getLogger(__name__)
 # Constants
 API_KEY = os.getenv("API_KEY", "default_key")  # Should be properly secured in production
 API_VERSION = "1.0.0"
-
-# Initialize model registry
-model_registry = ModelRegistry()
 
 # Monitoring metrics
 class Metrics:
@@ -50,17 +46,17 @@ feature_names = [
 ]
 
 def load_model():
-    """Load the latest model from the registry"""
+    """Load the model from xgboost.json"""
     global model
     try:
-        model_info = model_registry.get_latest_model()
-        if not model_info:
-            logger.error("No models found in registry")
+        model_path = "xgboost.json"
+        if not os.path.exists(model_path):
+            logger.error("Model file not found")
             return False
             
         model = xgb.Booster()
-        model.load_model(model_info['model_path'])
-        logger.info(f"Model loaded successfully: version {model_info['version']}")
+        model.load_model(model_path)
+        logger.info("Model loaded successfully")
         return True
     except Exception as e:
         logger.error(f"Error loading model: {str(e)}")
@@ -222,18 +218,4 @@ async def get_metrics(_: str = Depends(verify_api_key)):
 async def reset_metrics(_: str = Depends(verify_api_key)):
     """Reset all metrics"""
     metrics.reset()
-    return {"status": "metrics_reset"}
-
-@app.get("/model/versions")
-async def list_model_versions(_: str = Depends(verify_api_key)):
-    """List all available model versions"""
-    versions = model_registry.list_versions()
-    return {"versions": versions}
-
-@app.get("/model/info/{version}")
-async def get_model_info(version: str, _: str = Depends(verify_api_key)):
-    """Get information about a specific model version"""
-    model_info = model_registry.get_model_info(version)
-    if not model_info:
-        raise HTTPException(status_code=404, detail="Model version not found")
-    return model_info 
+    return {"status": "metrics_reset"} 

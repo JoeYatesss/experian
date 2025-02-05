@@ -86,7 +86,8 @@ A production-ready fraud detection system with inference and training pipelines.
   - API key authentication
   - Health checks and model info endpoints
   - Real-time metrics tracking
-  - Model version management
+  - Simple model loading with fallback to default model (xgboost.json in root directory)
+  - Note: Currently using single model approach for simplicity. Model versioning can be implemented later if needed.
 
 ### 2. Training Pipeline Design
 - **Data Processing**
