@@ -9,4 +9,6 @@ scikit-learn==1.4.0
 python-jose==3.3.0
 passlib==1.7.4
 pytest==8.0.0
-httpx==0.26.0  # Required for FastAPI TestClient 
+httpx==0.26.0  # Required for FastAPI TestClient
+boto3>=1.26.0
+sagemaker>=2.175.0 
