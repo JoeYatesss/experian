@@ -2,10 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends, Security
 from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel, Field
 import xgboost as xgb
-import numpy as np
-from typing import Dict, List
+from typing import Dict
 import os
-import json
 import logging
 from contextlib import asynccontextmanager
 import time

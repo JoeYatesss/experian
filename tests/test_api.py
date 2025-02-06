@@ -5,7 +5,6 @@ import xgboost as xgb
 import numpy as np
 import os
 import logging
-import json
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -1,7 +1,4 @@
 import xgboost as xgb
-import json
-import numpy as np
-from typing import List, Tuple
 
 # Load the model
 model = xgb.Booster()
