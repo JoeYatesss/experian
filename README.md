@@ -4,65 +4,95 @@ A production-ready fraud detection system with inference and training pipelines.
 
 ## Cloud Architecture (AWS)
 
-### Training Pipeline Infrastructure
+### ETL Pipeline Infrastructure
 - **Data Source**: Snowflake connection via AWS PrivateLink
-- **Compute**: AWS Batch for scheduled training jobs
-  - Managed compute environment
-  - Monthly scheduled jobs via EventBridge
+- **Data Processing**:
+  - AWS Glue for ETL jobs
+  - Glue DataBrew for feature engineering
+  - Glue Catalog for feature metadata
 - **Storage**:
-  - S3 bucket for model artifacts
-  - ECR for container images
+  - S3 for raw and processed data
+  - Feature Store for feature versioning
 - **Orchestration**: AWS Step Functions
   - Data extraction from Snowflake
-  - Model training
-  - Validation steps
-  - Model registration
+  - Feature engineering steps
+  - Data quality validation
+  - Feature Store updates
+
+### Training Pipeline Infrastructure (SageMaker)
+- **Development**: 
+  - SageMaker Studio for notebook development
+  - SageMaker Experiments for experiment tracking
+- **Training**:
+  - SageMaker Training Jobs with XGBoost built-in algorithm
+  - Hyperparameter optimization with SageMaker HPO
+  - Distributed training support
+  - Spot instance support for cost optimization
+- **Model Management**:
+  - SageMaker Model Registry
+  - Model versioning and lineage tracking
+  - A/B testing configuration
+- **Pipeline Orchestration**:
+  - SageMaker Pipelines for end-to-end ML workflow
+  - Automated retraining triggers
+  - Model evaluation and validation steps
 
 ### Inference Pipeline Infrastructure
-- **Compute**: ECS Fargate
-  - Auto-scaling based on request load
-  - Multiple availability zones
+- **Deployment Options**:
+  - SageMaker Endpoints for real-time inference
+  - Auto-scaling configuration
+  - Multi-model endpoints support
 - **API Gateway**:
   - REST API endpoints
   - Request throttling
   - API key management
 - **Monitoring**:
+  - SageMaker Model Monitor
+    - Data quality monitoring
+    - Model quality monitoring
+    - Bias drift monitoring
+    - Feature attribution drift
   - CloudWatch for logs and metrics
-  - Model performance monitoring
-  - Request/response logging
 - **Security**:
   - WAF for API protection
   - Secrets Manager for credentials
   - IAM roles for service access
 
 ### Integration Points
-- **Model Registry**: S3 + DynamoDB
-  - S3 for model files
-  - DynamoDB for metadata
-- **Monitoring**: CloudWatch
-  - Custom metrics for model performance
-  - Automated alerts
-- **CI/CD**: AWS CodePipeline
-  - CodeBuild for testing
-  - CodeDeploy for blue-green deployment
+- **Model Registry**: SageMaker Model Registry
+  - Model artifacts in S3
+  - Model metadata and versioning
+  - Approval workflows
+- **Feature Store**: SageMaker Feature Store
+  - Online and offline storage
+  - Feature versioning
+  - Feature sharing
+- **Monitoring**: 
+  - SageMaker Model Monitor
+  - CloudWatch
+  - Custom metrics dashboard
+- **CI/CD**: 
+  - AWS CodePipeline
+  - SageMaker Projects
+  - MLOps templates
 
 ## Key Assumptions
 
 ### Business Requirements
-1. Monthly retraining is fixed and not dynamic
-2. No real-time feature engineering needed
-3. All features will be provided in request (no feature store needed)
-4. Single model serving (no ensemble/champion-challenger)
-5. No specific latency requirements specified
-6. No specific throughput requirements specified
+1. Monthly retraining schedule with capability for on-demand retraining
+2. Feature engineering pipeline needed for data preparation
+3. Features will be stored in SageMaker Feature Store
+4. Support for A/B testing and champion-challenger
+5. Inference latency requirement: < 100ms
+6. Throughput requirement: 1000 TPS
 
 ### Technical Assumptions
-1. XGBoost version compatibility between training and inference
-2. JSON is acceptable for API request/response format
-3. Synchronous predictions (no batch prediction needs)
-4. No data retention requirements specified
-5. No specific regulatory compliance requirements
-6. English as primary language for logs/documentation
+1. Using SageMaker XGBoost container version 1.7-1
+2. JSON format for API interactions
+3. Both real-time and batch prediction support
+4. 30-day data retention for monitoring
+5. SOC 2 compliance requirements
+6. Multi-language support for logs/documentation
 
 ### Security Assumptions
 1. Internal API (not public-facing)
@@ -80,7 +110,43 @@ A production-ready fraud detection system with inference and training pipelines.
 
 ## System Design
 
-### 1. Inference Pipeline
+### 1. ETL Pipeline
+- **Data Ingestion**
+  - Snowflake to S3 via AWS Glue
+  - Data validation checks
+  - Schema evolution handling
+  
+- **Feature Engineering**
+  - Glue DataBrew for transformations
+  - Feature Store ingestion
+  - Data quality monitoring
+  
+- **Feature Store Management**
+  - Online/Offline store sync
+  - Feature groups organization
+  - Access patterns optimization
+
+### 2. Training Pipeline
+- **SageMaker Pipeline Stages**
+  - Feature Store data extraction
+  - Data preprocessing and validation
+  - Training job configuration
+  - Model evaluation
+  - Model registration
+  - Deployment approval
+
+- **XGBoost Configuration**
+  - SageMaker built-in algorithm
+  - Hyperparameters:
+    - max_depth: 3
+    - learning_rate: 0.3
+    - objective: binary:logistic
+    - eval_metric: AUC
+  - Early stopping after 10 rounds
+  - Distributed training enabled
+  - Spot instances for cost optimization
+
+### 3. Inference Pipeline
 - **FastAPI Application**
   - RESTful endpoints for predictions
   - API key authentication
@@ -89,28 +155,7 @@ A production-ready fraud detection system with inference and training pipelines.
   - Simple model loading with fallback to default model (xgboost.json in root directory)
   - Note: Currently using single model approach for simplicity. Model versioning can be implemented later if needed.
 
-### 2. Training Pipeline Design
-- **Data Processing**
-  - CSV data ingestion
-  - Feature preprocessing
-  - Train/validation split (80/20)
-
-- **Model Training**
-  - XGBoost binary classifier
-  - Hyperparameters:
-    - max_depth: 3
-    - learning rate: 0.3
-    - objective: binary:logistic
-    - eval_metric: AUC
-  - Early stopping after 10 rounds
-  - 100 maximum boosting rounds
-
-- **Model Evaluation**
-  - AUC-ROC score on validation set
-  - Feature count tracking
-  - Training sample size logging
-
-### 3. Model Registry
+### 4. Model Registry
 - **Version Control**
   - Timestamp-based versioning (YYYYMMDD_HHMMSS)
   - Model file storage
@@ -120,7 +165,7 @@ A production-ready fraud detection system with inference and training pipelines.
     - Feature names
     - Creation timestamp
 
-### 4. Monitoring
+### 5. Monitoring
 - **Real-time Metrics**
   - Request count
   - Error rate
@@ -128,7 +173,7 @@ A production-ready fraud detection system with inference and training pipelines.
   - Prediction value distribution
   - Automatic metric reset capability
 
-### 5. CI/CD Pipeline
+### 6. CI/CD Pipeline
 - **Testing**: Automated unit tests
 - **Training**: Model retraining on main branch updates
 - **Deployment**: Docker container build and push
