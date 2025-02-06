@@ -9,15 +9,12 @@ from contextlib import asynccontextmanager
 import time
 from datetime import datetime
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Constants
-API_KEY = os.getenv("API_KEY", "default_key")  # Should be properly secured in production
+API_KEY = os.getenv("API_KEY", "default_key")
 API_VERSION = "1.0.0"
 
-# Monitoring metrics
 class Metrics:
     def __init__(self):
         self.request_count = 0
@@ -31,10 +28,9 @@ class Metrics:
 
 metrics = Metrics()
 
-# Security
 api_key_header = APIKeyHeader(name="X-API-Key")
 
-# Load model at startup
+# loading the model
 model = None
 feature_names = [
     "number_of_open_accounts",
@@ -60,7 +56,6 @@ def load_model():
         logger.error(f"Error loading model: {str(e)}")
         return False
 
-# Add test startup event handler
 def load_for_test():
     """Load model for testing"""
     if not load_model():
@@ -69,8 +64,6 @@ def load_for_test():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan event handler for model loading and cleanup"""
-    # Startup: Load the model
     if not load_model():
         logger.error("Failed to load model during startup")
     yield

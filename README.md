@@ -1,5 +1,75 @@
 # Fraud Detection System
 
+## Quick Start for Development
+
+### Prerequisites
+- Python 3.8+
+- Git
+- Virtual environment capability
+
+### Setting Up Development Environment
+1. Clone the repository and set up the environment:
+```bash
+# Setup the Python environment
+./setup.sh
+# Activate the virtual environment
+source venv/bin/activate
+```
+
+2. Start the FastAPI server:
+```bash
+# Start the development server with auto-reload
+uvicorn app.main:app --reload
+```
+The API will be available at `http://localhost:8000`
+
+3. Run the test suite:
+```bash
+# In a new terminal window, run the API tests
+# Option 1: Make the script executable first (one-time setup)
+chmod +x test_api.sh    # This adds executable permission to the file
+./test_api.sh          # Then you can run it directly
+
+# Option 2: Or run through bash (no chmod needed)
+bash test_api.sh
+```
+
+The test script will demonstrate:
+- API health check
+- Model information
+- Sample fraud prediction
+- API metrics
+
+### Sample Test Output
+```json
+// Health Check Response
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "version": "1.0.0"
+}
+
+// Sample Prediction Response
+{
+  "fraud_probability": 0.225,
+  "risk_level": "LOW",
+  "version": "1.0.0",
+  "prediction_timestamp": "2024-02-06T12:00:00",
+  "confidence_metrics": {
+    "prediction_time_ms": 5.23,
+    "model_confidence": 0.89,
+    "feature_completeness": 1.0
+  }
+}
+```
+
+### API Documentation
+Once the server is running, visit:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+---
+
 A production-ready fraud detection system with inference and training pipelines.
 
 ## Cloud Architecture (AWS)
