@@ -14,7 +14,7 @@
 ./dev.sh start
 ./dev.sh test
 ./dev.sh test-api
-.dev.sh logs
+./dev.sh logs
 ```
 ## Model Behavior Analysis
 
