@@ -63,22 +63,6 @@
 5. Edge cases are handled with reasonable risk scaling
 
 ## Cloud Architecture (AWS)
-
-### ETL Pipeline Infrastructure
-- **Data Source**: Snowflake connection via AWS PrivateLink
-- **Data Processing**:
-  - AWS Glue for ETL jobs
-  - Glue DataBrew for feature engineering
-  - Glue Catalog for feature metadata
-- **Storage**:
-  - S3 for raw and processed data
-  - Feature Store for feature versioning
-- **Orchestration**: AWS Step Functions
-  - Data extraction from Snowflake
-  - Feature engineering steps
-  - Data quality validation
-  - Feature Store updates
-
 ### Training Pipeline Infrastructure (SageMaker)
 - **Development**: 
   - SageMaker Studio for notebook development
