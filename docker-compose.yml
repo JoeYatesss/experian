@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - API_KEY=test_api_key_123
+      - MODEL_PATH=xgboost.json
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    environment:
+      - API_KEY=test_api_key_123
+      - MODEL_PATH=xgboost.json
+    command: pytest tests/ -v 

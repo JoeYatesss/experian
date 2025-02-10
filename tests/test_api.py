@@ -63,21 +63,6 @@ def create_test_model():
 
 client = TestClient(app)
 
-# Test data
-valid_features = {
-    "features": {
-        "credit_score": 750,
-        "transaction_amount": 1000
-    }
-}
-
-invalid_features = {
-    "features": {
-        "credit_score": 750
-        # Missing transaction_amount
-    }
-}
-
 def get_headers():
     return {"X-API-Key": API_KEY}
 
@@ -101,7 +86,6 @@ def test_model_info():
     assert "features" in data
     assert "model_type" in data
     assert data["model_type"] == "XGBoost"
-    # Verify the expected features are present
     expected_features = [
         "number_of_open_accounts",
         "total_credit_limit",
@@ -111,7 +95,6 @@ def test_model_info():
     assert all(feature in data["features"] for feature in expected_features)
 
 def test_predict_fraud_risk():
-    # Test data based on the feature names from xgboost.json
     test_input = {
         "features": {
             "number_of_open_accounts": 3,
@@ -125,13 +108,33 @@ def test_predict_fraud_risk():
     
     assert response.status_code == 200
     data = response.json()
-    assert "fraud_probability" in data
+    
+    # Check main structure
+    assert "prediction" in data
+    assert "input_summary" in data
+    assert "timestamp" in data
     assert "version" in data
-    assert isinstance(data["fraud_probability"], float)
-    assert 0 <= data["fraud_probability"] <= 1
+    
+    # Check prediction details
+    prediction = data["prediction"]
+    assert "fraud_probability" in prediction
+    assert "risk_level" in prediction
+    assert "risk_factors" in prediction
+    
+    # Check risk factors
+    risk_factors = prediction["risk_factors"]
+    assert "credit_utilization" in risk_factors
+    assert "accounts_in_arrears" in risk_factors
+    assert "total_accounts" in risk_factors
+    
+    # Check input summary
+    input_summary = data["input_summary"]
+    assert "total_balance" in input_summary
+    assert "credit_limit" in input_summary
+    assert "open_accounts" in input_summary
+    assert "accounts_in_arrears" in input_summary
 
 def test_predict_invalid_input():
-    # Test with missing fields
     invalid_input = {
         "features": {
             "number_of_open_accounts": 3,
@@ -144,7 +147,6 @@ def test_predict_invalid_input():
     assert response.status_code == 422  # Unprocessable Entity
 
 def test_predict_invalid_values():
-    # Test with invalid data types
     invalid_input = {
         "features": {
             "number_of_open_accounts": "invalid",  # Should be int

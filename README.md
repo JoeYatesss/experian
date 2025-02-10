@@ -3,74 +3,64 @@
 ## Quick Start for Development
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.9+
 - Git
 - Virtual environment capability
 
 ### Setting Up Development Environment
 1. Clone the repository and set up the environment:
 ```bash
-# Setup the Python environment
-./setup.sh
-# Activate the virtual environment
-source venv/bin/activate
+# Setup the Python environment using Docker
+./dev.sh start
+./dev.sh test
+./dev.sh test-api
+.dev.sh logs
 ```
+## Model Behavior Analysis
 
-2. Start the FastAPI server:
-```bash
-# Start the development server with auto-reload
-uvicorn app.main:app --reload
-```
-The API will be available at `http://localhost:8000`
+### Account Age and History
+- **New Accounts (1-2 accounts)**
+  - Low risk profile (0.1-0.6% fraud probability)
+  - Model is intentionally lenient on limited history
+  - Low utilization further reduces risk
 
-3. Run the test suite:
-```bash
-# In a new terminal window, run the API tests
-# Option 1: Make the script executable first (one-time setup)
-chmod +x test_api.sh    # This adds executable permission to the file
-./test_api.sh          # Then you can run it directly
+### Credit Utilization Impact
+- **Low Utilization (10%)**
+  - Very low risk (0.1% fraud probability)
+  - Indicates responsible credit management
+- **High Utilization (95%)**
+  - Moderate risk increase (1.3% fraud probability)
+  - Not a major risk factor in isolation
 
-# Option 2: Or run through bash (no chmod needed)
-bash test_api.sh
-```
+### Payment History (Primary Risk Factor)
+- **Accounts in Arrears**
+  - No arrears: < 1% fraud probability
+  - 1 account in arrears: 22.5% fraud probability
+  - 3 accounts in arrears: 70.9% fraud probability (HIGH risk)
+  - Most significant individual risk factor
 
-The test script will demonstrate:
-- API health check
-- Model information
-- Sample fraud prediction
-- API metrics
+### Account Portfolio Analysis
+- **Multiple Accounts in Good Standing**
+  - 15+ accounts: 6.6% base risk
+  - Indicates established credit history
+- **Multiple Accounts with Mixed History**
+  - Many accounts with some arrears: 1.1% risk
+  - Model values long-term history over isolated incidents
 
-### Sample Test Output
-```json
-// Health Check Response
-{
-  "status": "healthy",
-  "model_loaded": true,
-  "version": "1.0.0"
-}
+### Edge Case Handling
+- **High-Value Accounts**
+  - Very high limits ($100k+): 16.5% risk
+  - Model applies additional scrutiny to large exposures
+- **Small Accounts**
+  - Low limits ($1k): 0.8% risk
+  - Model maintains proportional risk assessment
 
-// Sample Prediction Response
-{
-  "fraud_probability": 0.225,
-  "risk_level": "LOW",
-  "version": "1.0.0",
-  "prediction_timestamp": "2024-02-06T12:00:00",
-  "confidence_metrics": {
-    "prediction_time_ms": 5.23,
-    "model_confidence": 0.89,
-    "feature_completeness": 1.0
-  }
-}
-```
-
-### API Documentation
-Once the server is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
----
-
-A production-ready fraud detection system with inference and training pipelines.
+### Key Model Characteristics
+1. Payment history (arrears) is the strongest predictor
+2. Account age and history provide important context
+3. Credit utilization has moderate impact
+4. Model balances multiple risk factors effectively
+5. Edge cases are handled with reasonable risk scaling
 
 ## Cloud Architecture (AWS)
 
@@ -288,49 +278,3 @@ A production-ready fraud detection system with inference and training pipelines.
 - API key authentication required for all endpoints
 - Environment variable configuration
 - Secure model loading and validation
-
-## Model Behavior Analysis
-
-### Account Age and History
-- **New Accounts (1-2 accounts)**
-  - Low risk profile (0.1-0.6% fraud probability)
-  - Model is intentionally lenient on limited history
-  - Low utilization further reduces risk
-
-### Credit Utilization Impact
-- **Low Utilization (10%)**
-  - Very low risk (0.1% fraud probability)
-  - Indicates responsible credit management
-- **High Utilization (95%)**
-  - Moderate risk increase (1.3% fraud probability)
-  - Not a major risk factor in isolation
-
-### Payment History (Primary Risk Factor)
-- **Accounts in Arrears**
-  - No arrears: < 1% fraud probability
-  - 1 account in arrears: 22.5% fraud probability
-  - 3 accounts in arrears: 70.9% fraud probability (HIGH risk)
-  - Most significant individual risk factor
-
-### Account Portfolio Analysis
-- **Multiple Accounts in Good Standing**
-  - 15+ accounts: 6.6% base risk
-  - Indicates established credit history
-- **Multiple Accounts with Mixed History**
-  - Many accounts with some arrears: 1.1% risk
-  - Model values long-term history over isolated incidents
-
-### Edge Case Handling
-- **High-Value Accounts**
-  - Very high limits ($100k+): 16.5% risk
-  - Model applies additional scrutiny to large exposures
-- **Small Accounts**
-  - Low limits ($1k): 0.8% risk
-  - Model maintains proportional risk assessment
-
-### Key Model Characteristics
-1. Payment history (arrears) is the strongest predictor
-2. Account age and history provide important context
-3. Credit utilization has moderate impact
-4. Model balances multiple risk factors effectively
-5. Edge cases are handled with reasonable risk scaling
