@@ -1,64 +1,22 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app, API_KEY, load_for_test
-import xgboost as xgb
-import numpy as np
-import os
 import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Set test model path
-TEST_MODEL_PATH = "test_xgboost.json"
-app.state.MODEL_PATH = TEST_MODEL_PATH
-
 @pytest.fixture(scope="session", autouse=True)
-def create_test_model():
-    """Create a test model if it doesn't exist"""
+def setup_test_environment():
+    """Setup test environment"""
     try:
-        if not os.path.exists(TEST_MODEL_PATH):
-            logger.info(f"Creating test model at {TEST_MODEL_PATH}")
-            # Create sample data with correct feature names
-            feature_names = [
-                "number_of_open_accounts",
-                "total_credit_limit",
-                "total_balance",
-                "number_of_accounts_in_arrears"
-            ]
-            X = np.random.rand(100, len(feature_names))
-            y = np.random.randint(0, 2, 100)
-            dtrain = xgb.DMatrix(X, label=y, feature_names=feature_names)
-            
-            # Create and train the model
-            bst = xgb.Booster()
-            bst = xgb.train(
-                params={'max_depth': 2, 'eta': 0.3, 'objective': 'binary:logistic'},
-                dtrain=dtrain,
-                num_boost_round=2
-            )
-            bst.save_model(TEST_MODEL_PATH)
-            logger.info("Test model created successfully")
-        else:
-            logger.info(f"Test model already exists at {TEST_MODEL_PATH}")
-        
-        # Verify the model file exists and is readable
-        assert os.path.exists(TEST_MODEL_PATH), f"Model file not found at {TEST_MODEL_PATH}"
-        assert os.access(TEST_MODEL_PATH, os.R_OK), f"Model file not readable at {TEST_MODEL_PATH}"
-        
         # Load the model for testing
         assert load_for_test(), "Failed to load model for testing"
-        logger.info("Test model loaded successfully")
-        
-        yield TEST_MODEL_PATH
-        
-        # Cleanup after tests
-        if os.path.exists(TEST_MODEL_PATH):
-            os.remove(TEST_MODEL_PATH)
-            logger.info(f"Test model cleaned up at {TEST_MODEL_PATH}")
+        logger.info("Model loaded successfully for testing")
+        yield
     except Exception as e:
-        logger.error(f"Error in test model setup: {str(e)}")
+        logger.error(f"Error in test setup: {str(e)}")
         raise
 
 client = TestClient(app)

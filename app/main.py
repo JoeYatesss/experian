@@ -11,17 +11,32 @@ API_KEY = os.getenv("API_KEY", "default_key")
 api_key_header = APIKeyHeader(name="X-API-Key")
 model = None
 
+# Load model at startup
+@app.on_event("startup")
+async def startup_event():
+    global model
+    model_path = os.getenv("MODEL_PATH", "xgboost.json")
+    print(f"Attempting to load model from: {model_path}")
+    print(f"Current working directory: {os.getcwd()}")
+    if not load_model(model_path):
+        print("Warning: Failed to load model at startup")
+
 # Load model
 def load_model(model_path=None):
     global model
     try:
         model = xgb.Booster()
         model_path = model_path or "xgboost.json"
+        print(f"Loading model from path: {model_path}")
+        if not os.path.exists(model_path):
+            print(f"Error: Model file not found at {model_path}")
+            return False
         model.load_model(model_path)
         # Set model parameters to match training
         model.set_param('max_depth', 6)
         model.set_param('eta', 0.3)
         model.set_param('objective', 'binary:logistic')
+        print("Model loaded successfully!")
         return True
     except Exception as e:
         print(f"Error loading model: {str(e)}")
@@ -29,8 +44,8 @@ def load_model(model_path=None):
 
 # Function for testing
 def load_for_test():
-    """Special function for testing that loads a test model"""
-    return load_model(os.getenv("MODEL_PATH", "test_xgboost.json"))
+    """Special function for testing that loads the model"""
+    return load_model("xgboost.json")
 
 # Models
 class Features(BaseModel):
