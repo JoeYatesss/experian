@@ -102,23 +102,47 @@
   - Secrets Manager for credentials
   - IAM roles for service access
 
-### Integration Points
-- **Model Registry**: SageMaker Model Registry
-  - Model artifacts in S3
-  - Model metadata and versioning
-  - Approval workflows
-- **Feature Store**: SageMaker Feature Store
-  - Online and offline storage
-  - Feature versioning
-  - Feature sharing
-- **Monitoring**: 
-  - SageMaker Model Monitor
-  - CloudWatch
-  - Custom metrics dashboard
-- **CI/CD**: 
-  - AWS CodePipeline
-  - SageMaker Projects
-  - MLOps templates
+### Production Integration Plan
+
+1. **Container Setup**
+   - Build optimized Docker image for production
+   - Push to private container registry
+   - Use multi-stage builds to minimize image size
+
+2. **Infrastructure**
+   - Deploy behind a load balancer
+   - Set up auto-scaling based on load
+   - Use managed Kubernetes or ECS for orchestration
+
+3. **Security**
+   - Store API keys in a secrets manager
+   - Enable SSL/TLS
+   - Set up network security groups
+   - Add rate limiting for API endpoints
+
+4. **Monitoring**
+   - Set up logging (application logs + model predictions)
+   - Monitor key metrics:
+     - API response times
+     - Error rates
+     - Model prediction accuracy
+   - Configure alerts for critical issues
+
+5. **Model Management**
+   - Regular model retraining pipeline
+   - Version control for model files
+   - Backup procedures for model data
+
+6.  **Backup and Recovery**
+  1. Regular backups of:
+     - Model files
+     - Configuration
+     - Training data
+  
+  2. Recovery procedures:
+     - Model rollback process
+     - Container restart procedure
+     - Load balancer failover
 
 ## Key Assumptions
 
