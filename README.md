@@ -134,12 +134,12 @@
    - Backup procedures for model data
 
 6.  **Backup and Recovery**
-  1. Regular backups of:
+   Regular backups of:
      - Model files
      - Configuration
      - Training data
   
-  2. Recovery procedures:
+    Recovery procedures:
      - Model rollback process
      - Container restart procedure
      - Load balancer failover
