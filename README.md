@@ -156,7 +156,7 @@
 6. Throughput requirement: 1000 TPS
 
 ### Technical Assumptions
-1. Using SageMaker XGBoost container version 1.7-1
+1. Using up to date SageMaker XGBoost version
 2. JSON format for API interactions
 3. Both real-time and batch prediction support
 4. 30-day data retention for monitoring
